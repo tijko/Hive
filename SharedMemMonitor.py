@@ -20,7 +20,7 @@ class ShMemMonitorProcess(object):
     @property
     def scrape_procfs(self):
         rss = 0
-        child_ps = set() # XXX create a hash to look-up the previous memory used if already found....
+        child_ps = dict()
         start = time.time()
         while (time.time() - start) < 100:
             for pid in filter(lambda p: p.isdigit(), os.listdir('/proc')):
@@ -32,27 +32,38 @@ class ShMemMonitorProcess(object):
                             continue
                         ppid = ppid[0].split('\t')[1].strip('\n')
                         if ppid == self.ppid:
-                            if pid not in child_ps:
-                                print('Adding Process to Set...')
-                                child_ps.add(pid)
+                            with open('/proc/{}/status'.format(pid)) as fh:
+                                vmrss = fh.readlines()
+                                vmrss = [i for i in vmrss if i.startswith('VmRSS')]
+                            if not vmrss:
+                                continue
+                            vmrss = vmrss[0].split('\t')[1].strip('\n')
+                            ps_rss = self.calculate_memory(vmrss)
+                            if not child_ps.get(pid):
                                 with open('/proc/{}/comm'.format(pid)) as fh:
                                     comm = fh.readlines()
                                     print('Found Child Process {}!'.format(pid))
                                     print(comm)
-                                    time.sleep(1)
-                                with open('/proc/{}/status'.format(pid)) as fh:
-                                    vmrss = fh.readlines()
-                                    vmrss = [i for i in vmrss if i.startswith('VmRSS')]
-                                    if not vmrss:
-                                        continue
-                                    vmrss = vmrss[0].split('\t')[1].strip('\n')
-                                    rss += self.calculate_memory(vmrss)
-                                print('Bytes....{}'.format(rss))
+                                print('Adding Process to Hash...')
+                                child_ps[pid] = ps_rss
+                                rss += ps_rss
+                                time.sleep(1)
                             else:
-                                print('Process was in set...')
+                                # re-calculate process memory
+                                print('Process was already found running...')
+                                print('Re-calculating memory usage...')
+                                previous_rss_used = child_ps[pid]
+                                if previous_rss_used > ps_rss:
+                                    memory_adj = previous_rss_used - ps_rss
+                                    rss -= memory_adj
+                                elif previous_rss_used <= ps_rss:
+                                    memory_adj = ps_rss - previous_rss_used
+                                    rss += memory_adj
+                                child_ps[pid] = ps_rss
+                            print('Bytes....{}'.format(rss))
                 except FileNotFoundError:
                     continue
 
 
 if __name__ == '__main__':
-    shmem = ShMemMonitorProcess('327257')
+    shmem = ShMemMonitorProcess('1274')
