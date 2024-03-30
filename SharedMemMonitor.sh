@@ -4,7 +4,7 @@ firefox_pid=""
 rss_total=0
 verbose=false
 
-if [[ $# -gt 2 ]]
+if [[ $# -gt 1 ]]
 then
     verbose=true
 fi
