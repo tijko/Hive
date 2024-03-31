@@ -4,9 +4,10 @@ firefox_pid=""
 rss_total=0
 verbose=false
 
-if [[ $# -gt 1 ]]
+if [[ $# -gt 0 ]]
 then
-    verbose=true
+    echo "Verbosity Set"
+    verbose="true"
 fi
 
 for ((;;))
@@ -25,7 +26,7 @@ do
                 echo Found Firefox PID $firefox_pid
             fi
         else
-            if [[ "${verbos}" == true ]]
+            if [[ "${verbose}" == true ]]
             then
                 echo Found Firefox Child $pid
             fi
