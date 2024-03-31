@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import time
 
 
@@ -66,4 +67,5 @@ class ShMemMonitorProcess(object):
 
 
 if __name__ == '__main__':
-    shmem = ShMemMonitorProcess('1274')
+    pid = sys.argv[1]
+    shmem = ShMemMonitorProcess(pid)
