@@ -1,0 +1,19 @@
+name: Shared Memory Calculator
+on:
+  push:
+    branches:
+      - 'main'
+jobs:
+  run_tests:
+    runs-on: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+        name: CheckOut
+      - uses: actions/setup-python@v5
+        name: Setup Python
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Run Tests
+        run: python --version

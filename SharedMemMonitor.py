@@ -8,13 +8,13 @@ import time
 
 class ShMemMonitorProcess(object):
 
-    def __init__(self, ppid):
+    def __init__(self, ppid: str):
         self.ppid = ppid
         # Create a Sub-Class for Thread module
         self.memory = {'kB':1024, 'mB':1024*1024, 'gB':1024*1024*1024}
         self.scrape_procfs
         
-    def calculate_memory(self, vmrss):
+    def calculate_memory(self, vmrss: str) -> int:
         memory, size = vmrss.split()
         return int(memory) * self.memory[size]
 
